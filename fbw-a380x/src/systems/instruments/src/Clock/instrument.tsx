@@ -19,6 +19,12 @@ class A380X_Clock extends BaseInstrument {
    */
   private gameState = 0;
 
+  private lastUpdate = 0;
+
+  // Update frequency of 6Hz (166ms) is sufficient for the clock.
+  // The Chrono/ElapsedTime components expect 5Hz.
+  private readonly UPDATE_INTERVAL = 166;
+
   constructor() {
     super();
     this.bus = new EventBus();
@@ -71,7 +77,11 @@ class A380X_Clock extends BaseInstrument {
       }
       this.gameState = gamestate;
     } else {
-      this.simVarPublisher.onUpdate();
+      const now = Date.now();
+      if (now - this.lastUpdate > this.UPDATE_INTERVAL) {
+        this.simVarPublisher.onUpdate();
+        this.lastUpdate = now;
+      }
     }
   }
 }
